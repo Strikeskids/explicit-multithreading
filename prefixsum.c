@@ -9,7 +9,7 @@ void display(int size, int *arr) {
 	for (i=0;i<size;++i) {
 		printf("%3d%s", arr[i], (i & 0x7) == 0x7 ? "\n" : " ");
 	}
-	if (!(size & 0x7)) {
+	if (size & 0x7) {
 		printf("\n");
 	}
 }
@@ -65,7 +65,7 @@ int intMax(int a, int b) {
 }
 
 int main(int argc, char **argv) {
-	prefix(3, data, intSum);
+	prefix(3, data, intMax);
 
 	display(8, data);
 }
