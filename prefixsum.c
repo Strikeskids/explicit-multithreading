@@ -24,8 +24,6 @@ void prefix(int bits, int *data, int (*f)(int, int)) {
 		arr[N+i] = data[i];
 	}
 
-	display(2*N, arr);
-
 	for (level=bits-1;level>=0;--level) {
 		int levelSize = 1 << level;
 		# pragma omp for private(i)
@@ -34,8 +32,6 @@ void prefix(int bits, int *data, int (*f)(int, int)) {
 			arr[loc] = f(arr[2*loc], arr[2*loc+1]);
 		}
 	}
-
-	display(2*N, arr);
 
 	for (level=1;level<=bits;++level) {
 		int levelSize = 1 << level;
@@ -49,8 +45,6 @@ void prefix(int bits, int *data, int (*f)(int, int)) {
 			}
 		}
 	}
-
-	display(2*N, arr);
 
 	# pragma omp for private(i)
 	for (i=0;i<N;++i) {
