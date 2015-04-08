@@ -29,8 +29,9 @@ void prefix(int bits, int *data, int (*f)(int, int)) {
 	for (level=bits-1;level>=0;--level) {
 		int levelSize = 1 << level;
 		# pragma omp for private(i)
-		for (i=2*levelSize-1;i>=levelSize;--i) {
-			arr[i] = f(arr[2*i], arr[2*i+1]);
+		for (i=0;i<levelSize;++i) {
+			int loc = levelSize + i;
+			arr[loc] = f(arr[2*loc], arr[2*loc+1]);
 		}
 	}
 
@@ -39,11 +40,12 @@ void prefix(int bits, int *data, int (*f)(int, int)) {
 	for (level=1;level<=bits;++level) {
 		int levelSize = 1 << level;
 		# pragma omp for private(i)
-		for (i=2*levelSize-1;i>levelSize;--i) { // Note > not >= (we want to skip leftmost)
+		for (i=1;i<levelSize;++i) { // Note starting at 1 (skip leftmost)
+			int loc = levelSize + i;
 			if (i & 1) {
-				arr[i] = arr[i/2];
+				arr[loc] = arr[loc/2];
 			} else {
-				arr[i] = f(arr[i], arr[i/2 - 1]);
+				arr[loc] = f(arr[loc], arr[loc/2-1]);
 			}
 		}
 	}
