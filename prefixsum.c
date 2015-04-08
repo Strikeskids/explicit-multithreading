@@ -15,14 +15,16 @@ void display(int size, int *arr) {
 }
 
 void prefix(int bits, int *data, int (*f)(int, int)) {
-	int i, N, *arr;
+	int i, level, N, *arr;
 	N = 1 << bits;
-	*arr = malloc(2*N, sizeof(int));
+	arr = calloc(2*N, sizeof(int));
 	
 	# pragma omp for private(i)
 	for (i=0;i<N;++i) {
 		arr[N+i] = data[i];
 	}
+
+	display(2*N, arr);
 
 	for (level=bits-1;level>=0;--level) {
 		int levelSize = 1 << level;
@@ -32,10 +34,12 @@ void prefix(int bits, int *data, int (*f)(int, int)) {
 		}
 	}
 
-	for (level=1;level<=LEVELS;++level) {
+	display(2*N, arr);
+
+	for (level=1;level<=bits;++level) {
 		int levelSize = 1 << level;
 		# pragma omp for private(i)
-		for (i=2*levelSize-1;i>levelSize;++i) { // Note > not >= (we want to skip leftmost)
+		for (i=2*levelSize-1;i>levelSize;--i) { // Note > not >= (we want to skip leftmost)
 			if (i & 1) {
 				arr[i] = arr[i/2];
 			} else {
@@ -43,6 +47,8 @@ void prefix(int bits, int *data, int (*f)(int, int)) {
 			}
 		}
 	}
+
+	display(2*N, arr);
 
 	# pragma omp for private(i)
 	for (i=0;i<N;++i) {
@@ -63,6 +69,8 @@ int intMax(int a, int b) {
 }
 
 int main(int argc, char **argv) {
-	
+	prefix(3, data, intSum);
+
+	display(8, data);
 }
 
