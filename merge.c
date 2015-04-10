@@ -20,11 +20,11 @@ int bitLog(int n) {
 	return i;
 }
 
-int binSearch(int val, int n, int *arr) {
+int binSearch(int val, int winner, int n, int *arr) {
 	int low = 0, high = n-1, mid;
 	while (low <= high) {
 		mid = (low+high+1)/2;
-		if (val < arr[mid]) {
+		if (val < arr[mid] || winner && val <= arr[mid]) {
 			high = mid-1;
 		} else {
 			low = mid+1;
@@ -33,11 +33,11 @@ int binSearch(int val, int n, int *arr) {
 	return low-1;
 }
 
-void serialRank(int n, int *rank, int sa, int ea, int *a, int sb, int *b) {
+void serialRank(int n, int winner, int *rank, int sa, int ea, int *a, int sb, int *b) {
 	int i = sa, j = sb;
 	while (i < ea && i < n) {
 		if (j < n) {
-			if (a[i] < b[j]) {
+			if (a[i] < b[j] || winner && a[i] <= b[j]) {
 				rank[i++] = j;
 			} else {
 				j++;
@@ -56,13 +56,13 @@ void rank(int n, int *ai, int *bi, int *av, int *bv) { // Ensure n is power of 2
 
 	for (i=0;i<blocks;++i) {
 		int loc = bits*i;
-		ai[loc] = binSearch(av[loc], n, bv)+1;
-		bi[loc] = binSearch(bv[loc], n, av)+1;
+		ai[loc] = binSearch(av[loc], 0, n, bv)+1;
+		bi[loc] = binSearch(bv[loc], 1, n, av)+1;
 	}
 
 	for (i=0;i<blocks;++i) {
-		serialRank(n, ai, bits*i, bits*(i+1), av, ai[bits*i], bv);
-		serialRank(n, bi, bits*i, bits*(i+1), bv, bi[bits*i], av);
+		serialRank(n, 0, ai, bits*i, bits*(i+1), av, ai[bits*i], bv);
+		serialRank(n, 1, bi, bits*i, bits*(i+1), bv, bi[bits*i], av);
 	}
 }
 
@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
 	int c[32], i;
 	int ai[16], bi[16];
 
-	int a[16] = {0, 4, 5, 8, 12, 13, 14, 15, 17, 18, 19, 23, 24, 26, 27, 31};
+	int a[16] = {0, 4, 5, 7, 11, 13, 14, 15, 17, 18, 19, 23, 24, 26, 27, 31};
 	int b[16] = {1, 2, 3, 6, 7, 9, 10, 11, 16, 20, 21, 22, 25, 28, 29, 30};
 
 	printf("A\n");
