@@ -52,7 +52,7 @@ void rank(int n, int *ai, int *bi, int *av, int *bv) { // Ensure n is power of 2
 	int bits, blocks, i;
 
 	bits = bitLog(n-1);
-	blocks = (n+bits-1)/bits;
+	blocks = bits ? (n+bits-1)/bits : 1;
 
 	#pragma omp parallel for private(i)
 	for (i=0;i<blocks;++i) {
