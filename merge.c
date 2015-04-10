@@ -22,18 +22,14 @@ int bitLog(int n) {
 
 int binSearch(int val, int n, int *arr) {
 	int low = 0, high = n-1, mid;
-	printf("Bin search %d\n", val);
-	display(n, arr);
 	while (low <= high) {
 		mid = (low+high+1)/2;
-		printf("%d|%d|%d %d\n", low, mid, high, arr[mid]);
 		if (val < arr[mid]) {
 			high = mid-1;
 		} else {
 			low = mid+1;
 		}
 	}
-	printf("%d|%d --> %d\n", low, high, low-1);
 	return low-1;
 }
 
