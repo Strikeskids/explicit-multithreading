@@ -54,12 +54,14 @@ void rank(int n, int *ai, int *bi, int *av, int *bv) { // Ensure n is power of 2
 	bits = bitLog(n-1);
 	blocks = (n+bits-1)/bits;
 
+	#pragma omp parallel for private(i)
 	for (i=0;i<blocks;++i) {
 		int loc = bits*i;
 		ai[loc] = binSearch(av[loc], 0, n, bv)+1;
 		bi[loc] = binSearch(bv[loc], 1, n, av)+1;
 	}
 
+	#pragma omp parallel for private(i)
 	for (i=0;i<blocks;++i) {
 		serialRank(n, 0, ai, bits*i, bits*(i+1), av, ai[bits*i], bv);
 		serialRank(n, 1, bi, bits*i, bits*(i+1), bv, bi[bits*i], av);
@@ -74,6 +76,7 @@ void merge(int n, int *c, int *a, int *b) {
 
 	rank(n, ai, bi, a, b);
 
+	#pragma omp parallel for private(i)
 	for (i=0;i<n;++i) {
 		c[i+ai[i]] = a[i];
 		c[i+bi[i]] = b[i];
