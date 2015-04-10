@@ -86,6 +86,30 @@ void merge(int n, int *c, int *a, int *b) {
 	free(bi);
 }
 
+void mergeSort(int n, int *in) {
+	int *a, *b, *tmp, i, size;
+
+	a = in;
+	b = calloc(n, sizeof(int));
+
+	for (size=1;size<n;size<<=1) {
+		#pragma omp parallel for private(i)
+		for (i=0;i<n;i+=2*size) {
+			merge(size, b+i, a+i, a+i+size);
+		}
+		tmp = a;
+		a = b;
+		b = tmp;
+	}
+
+	if (a != in) {
+		#pragma omp parallel for private(i)
+		for (i=0;i<n;++i) {
+			in[i] = a[i];
+		}
+	}
+}
+
 int intSum(int a, int b) {
 	return a + b;
 }
@@ -99,27 +123,10 @@ int intMax(int a, int b) {
 }
 
 int main(int argc, char **argv) {
-	int c[32], i;
-	int ai[16], bi[16];
+	int a[16] = {5, 234, 1, 23, 54, 3, 2, 12, 4, 15, 23, 12, 56, 46, 92, 17};
 
-	int a[16] = {0, 4, 5, 7, 11, 13, 14, 15, 17, 18, 19, 23, 24, 26, 27, 31};
-	int b[16] = {1, 2, 3, 6, 7, 9, 10, 11, 16, 20, 21, 22, 25, 28, 29, 30};
-
-	printf("A\n");
 	display(16, a);
-	printf("B\n");
-	display(16, b);
-
-	rank(16, ai, bi, a, b);
-
-	printf("A rank\n");
-	display(16, ai);
-	printf("B rank\n");
-	display(16, bi);
-
-	merge(16, c, a, b);
-
-	printf("C\n");
-	display(32, c);
+	mergeSort(16, a);
+	display(16, a);
 }
 
