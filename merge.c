@@ -38,7 +38,7 @@ void serialRank(int n, int *rank, int sa, int ea, int *a, int sb, int *b) {
 	while (i < ea && i < n) {
 		if (j < n) {
 			if (a[i] < b[j]) {
-				rank[i++] = j-1;
+				rank[i++] = j;
 			} else {
 				j++;
 			}
@@ -56,13 +56,13 @@ void rank(int n, int *ai, int *bi, int *av, int *bv) { // Ensure n is power of 2
 
 	for (i=0;i<blocks;++i) {
 		int loc = bits*i;
-		ai[loc] = binSearch(av[loc], n, bv);
-		bi[loc] = binSearch(bv[loc], n, av);
+		ai[loc] = binSearch(av[loc], n, bv)+1;
+		bi[loc] = binSearch(bv[loc], n, av)+1;
 	}
 
 	for (i=0;i<blocks;++i) {
-		serialRank(n, ai, bits*i, bits*(i+1), av, ai[bits*i]+1, bv);
-		serialRank(n, bi, bits*i, bits*(i+1), bv, bi[bits*i]+1, av);
+		serialRank(n, ai, bits*i, bits*(i+1), av, ai[bits*i], bv);
+		serialRank(n, bi, bits*i, bits*(i+1), bv, bi[bits*i], av);
 	}
 }
 
@@ -75,8 +75,8 @@ void merge(int n, int *c, int *a, int *b) {
 	rank(n, ai, bi, a, b);
 
 	for (i=0;i<n;++i) {
-		c[i+ai[i]+1] = a[i];
-		c[i+bi[i]+1] = b[i];
+		c[i+ai[i]] = a[i];
+		c[i+bi[i]] = b[i];
 	}
 
 	free(ai);
