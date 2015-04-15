@@ -64,6 +64,28 @@ int intMax(int a, int b) {
 	return a > b ? a : b;
 }
 
+int *compact(int bits, int *used, int *values) {
+	int n, i, *arr, *compacted, cn;
+
+	n = 1 << bits;
+
+	arr = calloc(N, sizeof(int));
+	memcpy(arr, used, n);
+	prefix(bits, arr, intSum);
+
+	cn = arr[n-1];
+	compacted = calloc(cn, sizeof(int));
+
+	# pragma omp for private(i)
+	for (i=0;i<n;++i) {
+		if (used[i]) {
+			compacted[arr[i]] = values[i];
+		}
+	}
+
+	return compacted;
+}
+
 int main(int argc, char **argv) {
 	prefix(3, data, intMax);
 
