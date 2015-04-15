@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>
-
-int data[8] = { 1, 2, 1, 3, 5, 2, 1, 2 };
+#include <string.h>
 
 void display(int size, int *arr) {
 	int i;
@@ -64,31 +63,45 @@ int intMax(int a, int b) {
 	return a > b ? a : b;
 }
 
-int *compact(int bits, int *used, int *values) {
-	int n, i, *arr, *compacted, cn;
+int compact(int *packed, int bits, int *used, int *values) {
+	int n, i, *arr, cn;
 
 	n = 1 << bits;
 
-	arr = calloc(N, sizeof(int));
-	memcpy(arr, used, n);
+	arr = calloc(n, sizeof(int));
+	memcpy(arr, used, n*sizeof(int));
 	prefix(bits, arr, intSum);
 
 	cn = arr[n-1];
-	compacted = calloc(cn, sizeof(int));
 
 	# pragma omp for private(i)
 	for (i=0;i<n;++i) {
 		if (used[i]) {
-			compacted[arr[i]] = values[i];
+			packed[arr[i]-1] = values[i];
 		}
 	}
 
-	return compacted;
+	return cn;
 }
 
 int main(int argc, char **argv) {
+	int data[8] = { 1, 2, 1, 3, 5, 2, 1, 2 };
+	int used[8] = { 1, 0, 0, 1, 0, 1, 1, 0 };
+	int packed[8];
+
+	int psize = compact(packed, 3, used, data);
+
+	printf("Data\n");
+	display(8, data);
+	printf("Chosen\n");
+	display(8, used);
+
+	printf("Compacted\n");
+	display(psize, packed);
+
 	prefix(3, data, intMax);
 
+	printf("Prefix max\n");
 	display(8, data);
 }
 
