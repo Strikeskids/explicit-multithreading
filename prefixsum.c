@@ -13,6 +13,28 @@ void display(int size, int *arr) {
 	}
 }
 
+int combine(int bits, int *data, int (*f)(int, int)) {
+	int i, level, N, *arr;
+	N = 1 << bits;
+	arr = calloc(2*N, sizeof(int));
+	
+	# pragma omp for private(i)
+	for (i=0;i<N;++i) {
+		arr[N+i] = data[i];
+	}
+
+	for (level=bits-1;level>=0;--level) {
+		int levelSize = 1 << level;
+		# pragma omp for private(i)
+		for (i=0;i<levelSize;++i) {
+			int loc = levelSize + i;
+			arr[loc] = f(arr[2*loc], arr[2*loc+1]);
+		}
+	}
+
+	return arr[1];
+}
+
 void prefix(int bits, int *data, int (*f)(int, int)) {
 	int i, level, N, *arr;
 	N = 1 << bits;
@@ -84,6 +106,21 @@ int compact(int *packed, int bits, int *used, int *values) {
 	return cn;
 }
 
+int nearestOne(int bits, int *used, int loc) {
+	int level, n, i, *arr;
+
+	n = 1 << bits;
+	
+	arr = calloc(n, sizeof(int));
+
+	# pragma omp for private(i)
+	for (i=0;i<n;++i) {
+		arr[i] = i <= loc && used[i] ? i : -1;
+	}
+
+	return combine(bits, arr, intMax);
+}
+
 int main(int argc, char **argv) {
 	int data[8] = { 1, 2, 1, 3, 5, 2, 1, 2 };
 	int used[8] = { 1, 0, 0, 1, 0, 1, 1, 0 };
@@ -98,6 +135,8 @@ int main(int argc, char **argv) {
 
 	printf("Compacted\n");
 	display(psize, packed);
+
+	printf("Nearest One: (%d, %d), (%d, %d)\n", 2, nearestOne(3, used, 2), 5, nearestOne(3, used, 5));
 
 	prefix(3, data, intMax);
 
