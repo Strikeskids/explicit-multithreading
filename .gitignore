@@ -1,0 +1,6 @@
+xmtcc*
+xmtsim*
+*.log
+*.sim
+*.b
+*.out
