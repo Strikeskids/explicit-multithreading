@@ -19,20 +19,7 @@ int bitLog(int n) {
 	return i;
 }
 
-#ifdef DEBUG
-#define SPAWN_SETUP int dollarSign;
-#define SPAWN(start, end) for (dollarSign=start;dollarSign<=end;++dollarSign) { int $ = dollarSign;
-#define SPAWN_END }
-#define PRINTF_DEBUG(...) printf(__VA_ARGS__)
-#else
-#define SPAWN(start, end) spawn(start, end)
-#define SPAWN_SETUP ;
-#define SPAWN_END ;
-#define PRINTF_DEBUG(...) ;
-#endif
-
 void mergeSort(int n, int *in, int *tmp, int *indices) {
-    SPAWN_SETUP;
     int *source, *dest, i, groupSize;
 
     source = in;
@@ -44,13 +31,11 @@ void mergeSort(int n, int *in, int *tmp, int *indices) {
         blockBits = bitLog(groupSize-1);
         blockCount = blockBits ? (groupSize+blockBits-1)/blockBits : 1;
 
-        SPAWN(0, 2*blockCount*groupCount-1) {
+        spawn(0, 2*blockCount*groupCount-1) {
             int group = $ / blockCount;
             int block = blockBits * ($ % blockCount);
             int *src, *oth;
             int *ind;
-            
-            PRINTF_DEBUG("BS search=%d group=%d block=%d startSearch=%d\n", group ^ 1, group, block, (group ^ 1)*groupSize);
 
             src = source + group * groupSize;
             oth = source + (group ^ 1) * groupSize;
@@ -62,8 +47,6 @@ void mergeSort(int n, int *in, int *tmp, int *indices) {
                 low = 0;
                 high = groupSize-1;
                 winner = group & 1;
-
-                PRINTF_DEBUG("BS DATA goal=%d (%d %d) %d\n", search, low, high, winner);
                 
         	    while (low <= high) {
         	    	mid = (low+high+1)/2;
@@ -76,9 +59,9 @@ void mergeSort(int n, int *in, int *tmp, int *indices) {
 
                 ind[block] = (low-1) + 1;
             }
-        SPAWN_END }
+        }
 
-        SPAWN(0, 2*blockCount*groupCount-1) {
+        spawn(0, 2*blockCount*groupCount-1) {
             int group = $ / blockCount;
             int block = blockBits * ($ % blockCount);
             int nextBlock = block + blockBits;
@@ -113,9 +96,9 @@ void mergeSort(int n, int *in, int *tmp, int *indices) {
                     }
                 }
             }
-        SPAWN_END }
+        }
 
-        SPAWN(0, 2*groupCount*groupSize-1) {
+        spawn(0, 2*groupCount*groupSize-1) {
             int group = $ / groupSize;
             int groupIndex = $ % groupSize;
 
@@ -126,7 +109,7 @@ void mergeSort(int n, int *in, int *tmp, int *indices) {
             dst = dest + (group & (~1)) * groupSize;
 
             dst[groupIndex + ind[groupIndex]] = src[groupIndex];
-        SPAWN_END }
+        }
 
         tmp = source;
         source = dest;
@@ -134,9 +117,9 @@ void mergeSort(int n, int *in, int *tmp, int *indices) {
     }
 
     if (in != source) {
-        SPAWN(0, n) {
+        spawn(0, n) {
             in[$] = source[$];
-        SPAWN_END }
+        }
     }
 }
 
