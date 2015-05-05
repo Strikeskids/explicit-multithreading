@@ -21,13 +21,13 @@ int bitLog(int n) {
 
 #ifdef DEBUG
 #define SPAWN_SETUP int dollarSign;
-#define SPAWN(start, end) for (dollarSign=start;dollarSign<end;++dollarSign) { int $ = dollarSign;
+#define SPAWN(start, end) for (dollarSign=start;dollarSign<=end;++dollarSign) { int $ = dollarSign;
 #define SPAWN_END }
 #define PRINTF_DEBUG(...) printf(__VA_ARGS__)
 #else
 #define SPAWN(start, end) spawn(start, end)
-#define SPAWN_SETUP
-#define SPAWN_END
+#define SPAWN_SETUP ;
+#define SPAWN_END ;
 #define PRINTF_DEBUG(...) ;
 #endif
 
@@ -43,9 +43,8 @@ void mergeSort(int n, int *in, int *tmp, int *indices) {
         int blockBits, blockCount;
         blockBits = bitLog(groupSize-1);
         blockCount = blockBits ? (groupSize+blockBits-1)/blockBits : 1;
-        PRINTF_DEBUG("Run group %d count=%d, blockSize=%d, blockCount=%d\n", groupSize, groupCount, blockBits, blockCount);
 
-        SPAWN(0, 2*blockCount*groupCount) {
+        SPAWN(0, 2*blockCount*groupCount-1) {
             int group = $ / blockCount;
             int block = blockBits * ($ % blockCount);
             int *src, *oth;
@@ -79,10 +78,14 @@ void mergeSort(int n, int *in, int *tmp, int *indices) {
             }
         SPAWN_END }
 
-        SPAWN(0, 2*blockCount*groupCount) {
+        SPAWN(0, 2*blockCount*groupCount-1) {
             int group = $ / blockCount;
             int block = blockBits * ($ % blockCount);
             int nextBlock = block + blockBits;
+            int srcStart, srcEnd;
+
+            srcStart = block;
+            srcEnd = nextBlock < groupSize ? nextBlock : groupSize;
 
             int *src, *oth;
             int *ind;
@@ -96,9 +99,9 @@ void mergeSort(int n, int *in, int *tmp, int *indices) {
 
                 loser = group & 1;
 
-                srcIndex = block;
+                srcIndex = srcStart;
                 othIndex = ind[srcIndex];
-                while (srcIndex < nextBlock && srcIndex < groupSize) {
+                while (srcIndex < srcEnd) {
                     if (othIndex < groupSize) {
                         if (src[srcIndex] < oth[othIndex] || loser && src[srcIndex] == oth[othIndex]) {
                             ind[srcIndex++] = othIndex;
@@ -112,7 +115,7 @@ void mergeSort(int n, int *in, int *tmp, int *indices) {
             }
         SPAWN_END }
 
-        SPAWN(0, 2*groupCount*groupSize) {
+        SPAWN(0, 2*groupCount*groupSize-1) {
             int group = $ / groupSize;
             int groupIndex = $ % groupSize;
 
@@ -120,7 +123,7 @@ void mergeSort(int n, int *in, int *tmp, int *indices) {
 
             ind = indices + group * groupSize;
             src = source + group * groupSize;
-            dst = dest + (group&~1) * groupSize;
+            dst = dest + (group & (~1)) * groupSize;
 
             dst[groupIndex + ind[groupIndex]] = src[groupIndex];
         SPAWN_END }
